@@ -1,0 +1,4 @@
+Experimental single page chat application.
+
+TODO: Needs to make thi work with a propper HTTP server and make the
+node servre to manage only the seb-socket connections.

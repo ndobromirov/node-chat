@@ -1,0 +1,70 @@
+<html>
+  <head>
+    <title>Chatroom :)</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io.connect('http://chat.com:8080');
+      $(document).ready(function(){
+        var chat = $('#chat-box');
+        var input = $('#text-block');
+        var button = $('#post-button');
+        var username = $('#username');
+        
+        socket.on('chat-history', function(data) {
+          $.each(data.messages, function(index, message) {
+            chat.append(renderMessage(message));
+          });
+        });
+        
+        socket.on('new-message', function(data) {
+          chat.append(renderMessage(data.message));
+        });
+        
+        button.click(function(){
+          if (username.val().toString().trim() === '') {
+            return;
+          }
+          if (input.val().toString().trim() === '') {
+            return;
+          }
+          
+          socket.emit('post-message', {
+            username: username.val(),
+            text: input.val()
+          });
+        });
+      });
+      
+      function formatDate(dateTime) {
+        var date = dateTime.getDate() + '.' + (dateTime.getMonth()+1) + '.' + dateTime.getFullYear();
+        return date + ' ' + dateTime.getHours() + ':' + dateTime.getMinutes();
+      }
+      
+      function renderMessage(message) {
+        return [
+          '<div class="message">',
+            '<span class="date">' + formatDate(new Date(message.time)) + '</span>',
+            '<span class="username">' + message.user + '</span>',
+            '<span class="text">' + message.text + '</span>',
+          '</div>'
+        ].join('');
+      }
+      
+      
+      
+    </script>
+    <style>
+      .message {}
+      .message .date {font-size: 10px; padding: 4px 10px; float: left; display: inline-block;}
+      .message .username {display: inline-block; float: left; font-weight: bold; padding: 0 10px; width: 50px;}
+      .message .text {}
+    </style>
+  </head>
+  <body>
+    Enter your username: <input name="username" type="text" id="username" /><br />
+    <div id="chat-box"></div>
+    <input name="textBlock" type="text" id="text-block" /> 
+    <input type="button" name="submit" value="Post" id="post-button" />
+  </body>
+</html>
